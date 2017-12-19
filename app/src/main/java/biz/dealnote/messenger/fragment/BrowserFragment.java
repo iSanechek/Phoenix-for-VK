@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import biz.dealnote.messenger.Extra;
 import biz.dealnote.messenger.R;
 import biz.dealnote.messenger.activity.ActivityFeatures;
 import biz.dealnote.messenger.activity.ActivityUtils;
-import biz.dealnote.messenger.fragment.base.AccountDependencyFragment;
+import biz.dealnote.messenger.fragment.base.BaseFragment;
 import biz.dealnote.messenger.link.LinkHelper;
 import biz.dealnote.messenger.link.VkLinkParser;
 import biz.dealnote.messenger.link.types.AbsLink;
@@ -26,9 +25,14 @@ import biz.dealnote.messenger.link.types.PageLink;
 import biz.dealnote.messenger.listener.BackPressCallback;
 import biz.dealnote.messenger.util.Logger;
 
-public class BrowserFragment extends AccountDependencyFragment implements BackPressCallback {
+public class BrowserFragment extends BaseFragment implements BackPressCallback {
 
     public static final String TAG = BrowserFragment.class.getSimpleName();
+    private static final String SAVE_TITLE = "save_title";
+    protected WebView mWebView;
+    private int mAccountId;
+    private String title;
+    private Bundle webState;
 
     public static Bundle buildArgs(int accountId, @NonNull String url){
         Bundle args = new Bundle();
@@ -46,6 +50,8 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAccountId = getArguments().getInt(Extra.ACCOUNT_ID);
+
         setRetainInstance(true);
 
         if (savedInstanceState != null) {
@@ -53,13 +59,11 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
         }
     }
 
-    protected WebView mWebView;
-
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_browser, container, false);
-        ((AppCompatActivity) getActivity()).setSupportActionBar((Toolbar) root.findViewById(R.id.toolbar));
-        mWebView = (WebView) root.findViewById(R.id.webview);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
+        mWebView = root.findViewById(R.id.webview);
 
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
@@ -74,7 +78,7 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
             }
         });
 
-        //mWebView.getSettings().setJavaScriptEnabled(true); // из-за этого не срабатывал метод
+        mWebView.getSettings().setJavaScriptEnabled(true); // из-за этого не срабатывал метод
         // shouldOverrideUrlLoading в WebClient
 
         if (savedInstanceState != null) {
@@ -107,8 +111,6 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
         }
     }
 
-    private String title;
-
     @Override
     public void onResume() {
         super.onResume();
@@ -122,8 +124,6 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
                 .apply(getActivity());
     }
 
-    private Bundle webState;
-
     @Override
     public void onPause() {
         super.onPause();
@@ -131,10 +131,8 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
         mWebView.saveState(webState);
     }
 
-    private static final String SAVE_TITLE = "save_title";
-
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SAVE_TITLE, title);
         mWebView.saveState(outState);
@@ -162,14 +160,25 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
     private class VkLinkSupportWebClient extends WebViewClient {
 
         @Override
+        public void onLoadResource(WebView view, String url) {
+            super.onLoadResource(view, url);
+            Logger.d(TAG, "onLoadResource, url: " + url);
+        }
+
+        @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             AbsLink link = VkLinkParser.parse(url);
             Logger.d(TAG, "shouldOverrideUrlLoading, link: " + link + ", url: " + url);
 
             //link: null, url: https://vk.com/doc124456557_415878705
 
-            if (link == null || link instanceof PageLink) {
+            if (link == null) {
                 view.loadUrl(url);
+                return true;
+            }
+
+            if(link instanceof PageLink){
+                view.loadUrl(url + "?api_view=0df43cdc43a25550c6beb7357c9d41");
                 return true;
             }
 
@@ -178,7 +187,7 @@ public class BrowserFragment extends AccountDependencyFragment implements BackPr
                 return true;
             }
 
-            if (LinkHelper.openVKLink(getActivity(), getAccountId(), link)) {
+            if (LinkHelper.openVKLink(getActivity(), mAccountId, link)) {
                 return true;
             }
 

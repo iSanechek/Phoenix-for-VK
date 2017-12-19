@@ -192,10 +192,10 @@ public class AttachmentsViewBinder {
         }
     }
 
-    public void bindVoiceHolderById(int holderId, boolean play, boolean paused, float progress){
+    public void bindVoiceHolderById(int holderId, boolean play, boolean paused, float progress, boolean amin){
         VoiceHolder holder = mVoiceSharedHolders.findHolderByHolderId(holderId);
         if(nonNull(holder)){
-            bindVoiceHolderPlayState(holder, play, paused, progress);
+            bindVoiceHolderPlayState(holder, play, paused, progress, amin);
         }
     }
 
@@ -207,21 +207,21 @@ public class AttachmentsViewBinder {
             for (WeakReference<VoiceHolder> reference : set) {
                 VoiceHolder holder = reference.get();
                 if (nonNull(holder)) {
-                    bindVoiceHolderPlayState(holder, false, false, 0f);
+                    bindVoiceHolderPlayState(holder, false, false, 0f, false);
                 }
             }
         }
     }
 
-    private void bindVoiceHolderPlayState(VoiceHolder holder, boolean play, boolean paused, float progress) {
+    private void bindVoiceHolderPlayState(VoiceHolder holder, boolean play, boolean paused, float progress, boolean anim) {
         @DrawableRes
         int icon = play && !paused ? R.drawable.pause : R.drawable.play;
 
         holder.mButtonPlay.setImageResource(icon);
-        holder.mWaveFormView.setCurrentActiveProgress(play ? progress : 1.0f);
+        holder.mWaveFormView.setCurrentActiveProgress(play ? progress : 1.0f, anim);
     }
 
-    public void configNowVoiceMessagePlaying(int voiceMessageId, float progress, boolean paused) {
+    public void configNowVoiceMessagePlaying(int voiceMessageId, float progress, boolean paused, boolean amin) {
         SparseArray<Set<WeakReference<VoiceHolder>>> holders = mVoiceSharedHolders.getCache();
         for (int i = 0; i < holders.size(); i++) {
             int key = holders.keyAt(i);
@@ -232,7 +232,7 @@ public class AttachmentsViewBinder {
             for (WeakReference<VoiceHolder> reference : set) {
                 VoiceHolder holder = reference.get();
                 if (nonNull(holder)) {
-                    bindVoiceHolderPlayState(holder, play, paused, progress);
+                    bindVoiceHolderPlayState(holder, play, paused, progress, amin);
                 }
             }
         }
@@ -242,12 +242,20 @@ public class AttachmentsViewBinder {
         this.mVoiceActionListener = voiceActionListener;
     }
 
+    private static final byte[] DEFAUL_WAVEFORM = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+
     private void bindVoiceHolder(@NonNull VoiceHolder holder, @NonNull VoiceMessage voice) {
         int voiceMessageId = voice.getId();
         mVoiceSharedHolders.put(voiceMessageId, holder);
 
         holder.mDurationText.setText(AppTextUtils.getDurationString(voice.getDuration()));
-        holder.mWaveFormView.setWaveForm(voice.getWaveform());
+
+        // can bee NULL/empty
+        if(nonNull(voice.getWaveform()) && voice.getWaveform().length > 0){
+            holder.mWaveFormView.setWaveForm(voice.getWaveform());
+        } else {
+            holder.mWaveFormView.setWaveForm(DEFAUL_WAVEFORM);
+        }
 
         holder.mButtonPlay.setOnClickListener(v -> {
             if(nonNull(mVoiceActionListener)){

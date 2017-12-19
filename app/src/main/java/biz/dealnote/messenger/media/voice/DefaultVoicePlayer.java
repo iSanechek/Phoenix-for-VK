@@ -1,39 +1,37 @@
-package biz.dealnote.messenger.util.record;
+package biz.dealnote.messenger.media.voice;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.Toast;
 
 import java.io.IOException;
 
-import biz.dealnote.messenger.App;
 import biz.dealnote.messenger.model.VoiceMessage;
 import biz.dealnote.messenger.util.Objects;
+import biz.dealnote.messenger.util.Optional;
 
 /**
  * Created by admin on 09.10.2016.
  * phoenix
  */
-public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
+public class DefaultVoicePlayer implements IVoicePlayer, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener {
 
     private int mStatus;
     private MediaPlayer mPlayer;
-    private Callback mCallback;
+    private IPlayerStatusListener mCallback;
+    private IErrorListener mErrorListener;
     private int mDuration;
 
     public boolean toggle(int id, VoiceMessage audio) throws PrepareException {
         if (Objects.nonNull(mPlayingEntry) && mPlayingEntry.getId() == id) {
-            //changeStatusTo(Status.PREPARED); // ШТО??
             setSupposedToPlay(!isSupposedToPlay());
             return false;
         }
 
         stop();
 
-        mPlayingEntry = new Entry(id, audio);
+        mPlayingEntry = new AudioEntry(id, audio);
         mDuration = audio.getDuration() * 1000;
         mPlayer = new MediaPlayer();
 
@@ -49,35 +47,35 @@ public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         mPlayer.setOnCompletionListener(this);
 
         mSupposedToPlay = true;
-        changeStatusTo(Status.PREPARING);
+        changeStatusTo(STATUS_PREPARING);
 
         mPlayer.prepareAsync();
         return true;
     }
 
     public float getProgress() {
-        if (Objects.isNull(mPlayer)) {
+        if (Objects.isNull(mPlayer) || mStatus != STATUS_PREPARED) {
             return 0f;
         }
-
-        if (mStatus != Status.PREPARED) {
-            return 0f;
-        }
-
-        //int currentPosition = mPlayer.getCurrentPosition();
-        //int duration = mPlayer.getDuration();
-        //Logger.d(TAG, "currentPosition: " + currentPosition + ", duration: " + duration);
         return (float) mPlayer.getCurrentPosition() / (float) mDuration;
     }
 
-    public void setCallback(@Nullable Callback callback) {
-        this.mCallback = callback;
+    @Override
+    public void setCallback(@Nullable IPlayerStatusListener listener) {
+        this.mCallback = listener;
+    }
+
+    @Override
+    public void setErrorListener(@Nullable IErrorListener errorListener) {
+        this.mErrorListener = errorListener;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        if (mp != mPlayer) return;
-        changeStatusTo(Status.PREPARED);
+        if (mp != mPlayer) {
+            return;
+        }
+        changeStatusTo(STATUS_PREPARED);
 
         if (mSupposedToPlay) {
             mPlayer.start();
@@ -91,7 +89,7 @@ public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
             mPlayer = null;
         }
 
-        changeStatusTo(Status.NO_PLAYBACK);
+        changeStatusTo(STATUS_NO_PLAYBACK);
     }
 
     public void release() {
@@ -112,7 +110,9 @@ public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Toast.makeText(App.getInstance(), "Unable to play message", Toast.LENGTH_SHORT).show();
+        if(Objects.nonNull(mErrorListener) && mPlayer == mp){
+            mErrorListener.onPlayError(new Exception("Unable to play message, what: " + what + ", extra: " + extra));
+        }
         return false;
     }
 
@@ -120,12 +120,8 @@ public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
     public void onCompletion(MediaPlayer mp) {
         if (mp != mPlayer) return;
 
-        mSupposedToPlay = false;
-        changeStatusTo(Status.NO_PLAYBACK);
-    }
-
-    public class PrepareException extends Exception {
-
+        setSupposedToPlay(false);
+        changeStatusTo(STATUS_PREPARED);
     }
 
     public boolean isSupposedToPlay() {
@@ -139,7 +135,7 @@ public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
 
         this.mSupposedToPlay = supposedToPlay;
 
-        if (mStatus == Status.PREPARED) {
+        if (mStatus == STATUS_PREPARED) {
             if (supposedToPlay) {
                 mPlayer.start();
             } else {
@@ -148,53 +144,11 @@ public class VoicePlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         }
     }
 
-    private static class Entry {
+    private AudioEntry mPlayingEntry;
 
-        int id;
-        VoiceMessage audio;
-
-        Entry(int id, @NonNull VoiceMessage audio) {
-            this.id = id;
-            this.audio = audio;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Entry entry = (Entry) o;
-            return id == entry.id;
-        }
-
-        @Override
-        public int hashCode() {
-            return id;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public VoiceMessage getAudio() {
-            return audio;
-        }
-    }
-
-    private Entry mPlayingEntry;
-
-    public Integer getPlayingVoiceId() {
-        return mPlayingEntry == null ? null : mPlayingEntry.getId();
+    public Optional<Integer> getPlayingVoiceId() {
+        return mPlayingEntry == null ? Optional.empty() : Optional.wrap(mPlayingEntry.getId());
     }
 
     private boolean mSupposedToPlay;
-
-    public interface Callback {
-        void onPlayerStatusChange(int status);
-    }
-
-    public static final class Status {
-        public static final int NO_PLAYBACK = 0;
-        public static final int PREPARING = 1;
-        public static final int PREPARED = 2;
-    }
 }

@@ -31,6 +31,7 @@ import biz.dealnote.messenger.model.Message;
 import biz.dealnote.messenger.model.MessageStatus;
 import biz.dealnote.messenger.settings.CurrentTheme;
 import biz.dealnote.messenger.util.AppTextUtils;
+import biz.dealnote.messenger.util.Utils;
 import biz.dealnote.messenger.util.ViewUtils;
 import biz.dealnote.messenger.view.BubbleLinearLayout;
 import biz.dealnote.messenger.view.OnlineView;
@@ -203,9 +204,11 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
 
         holder.body.setText(OwnerLinkSpanFactory.withSpans(displayedBody, true, false, ownerLinkAdapter));
         holder.encryptedView.setVisibility(message.getCryptStatus() == CryptStatus.NO_ENCRYPTION ? View.GONE : View.VISIBLE);
-        holder.attachmentsRoot.setVisibility(message.hasAttachments() ? View.VISIBLE : View.GONE);
 
-        if (message.hasAttachments()) {
+        boolean hasAttachments = Utils.nonEmpty(message.getFwd()) || (nonNull(message.getAttachments()) && message.getAttachments().size() > 0);
+        holder.attachmentsRoot.setVisibility(hasAttachments ? View.VISIBLE : View.GONE);
+
+        if (hasAttachments) {
             attachmentsViewBinder.displayAttachments(message.getAttachments(), holder.attachmentsHolder, true);
             attachmentsViewBinder.displayForwards(message.getFwd(), holder.forwardMessagesRoot, context, true);
         }
@@ -284,12 +287,12 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
         this.attachmentsViewBinder.setVoiceActionListener(voiceActionListener);
     }
 
-    public void configNowVoiceMessagePlaying(int voiceId, float progress, boolean paused) {
-        attachmentsViewBinder.configNowVoiceMessagePlaying(voiceId, progress, paused);
+    public void configNowVoiceMessagePlaying(int voiceId, float progress, boolean paused, boolean amin) {
+        attachmentsViewBinder.configNowVoiceMessagePlaying(voiceId, progress, paused, amin);
     }
 
-    public void bindVoiceHolderById(int holderId, boolean play, boolean paused, float progress) {
-        attachmentsViewBinder.bindVoiceHolderById(holderId, play, paused, progress);
+    public void bindVoiceHolderById(int holderId, boolean play, boolean paused, float progress, boolean amin) {
+        attachmentsViewBinder.bindVoiceHolderById(holderId, play, paused, progress, amin);
     }
 
     public void disableVoiceMessagePlaying() {
@@ -320,7 +323,7 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
 
         StickerMessageHolder(View itemView) {
             super(itemView);
-            this.sticker = (ImageView) itemView.findViewById(R.id.sticker);
+            this.sticker = itemView.findViewById(R.id.sticker);
         }
     }
 
@@ -332,9 +335,9 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
 
         BaseMessageHolder(View itemView) {
             super(itemView);
-            this.status = (TextView) itemView.findViewById(R.id.item_message_status_text);
-            this.important = (OnlineView) itemView.findViewById(R.id.item_message_important);
-            this.avatar = (ImageView) itemView.findViewById(R.id.item_message_avatar);
+            this.status = itemView.findViewById(R.id.item_message_status_text);
+            this.important = itemView.findViewById(R.id.item_message_important);
+            this.avatar = itemView.findViewById(R.id.item_message_avatar);
         }
     }
 
@@ -345,14 +348,14 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
 
         ServiceMessageHolder(View itemView) {
             super(itemView);
-            tvAction = (TextView) itemView.findViewById(R.id.item_service_message_text);
+            tvAction = itemView.findViewById(R.id.item_service_message_text);
 
             mAttachmentsHolder = new AttachmentsHolder();
-            mAttachmentsHolder.setVgAudios((ViewGroup) itemView.findViewById(R.id.audio_attachments)).
-                    setVgDocs((ViewGroup) itemView.findViewById(R.id.docs_attachments)).
-                    setVgPhotos((ViewGroup) itemView.findViewById(R.id.photo_attachments)).
-                    setVgPosts((ViewGroup) itemView.findViewById(R.id.posts_attachments)).
-                    setVgStickers((ViewGroup) itemView.findViewById(R.id.stickers_attachments));
+            mAttachmentsHolder.setVgAudios(itemView.findViewById(R.id.audio_attachments)).
+                    setVgDocs(itemView.findViewById(R.id.docs_attachments)).
+                    setVgPhotos(itemView.findViewById(R.id.photo_attachments)).
+                    setVgPosts(itemView.findViewById(R.id.posts_attachments)).
+                    setVgStickers(itemView.findViewById(R.id.stickers_attachments));
         }
     }
 
@@ -362,7 +365,7 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
 
         DeletedMessageHolder(View itemView) {
             super(itemView);
-            buttonRestore = (Button) itemView.findViewById(R.id.item_messages_deleted_restore);
+            buttonRestore = itemView.findViewById(R.id.item_messages_deleted_restore);
         }
     }
 
@@ -380,21 +383,23 @@ public class MessagesAdapter extends RecyclerBindableAdapter<Message, RecyclerVi
             super(itemView);
             encryptedView = itemView.findViewById(R.id.item_message_encrypted);
 
-            body = (EmojiconTextView) itemView.findViewById(R.id.item_message_text);
+            body = itemView.findViewById(R.id.item_message_text);
             body.setMovementMethod(LinkMovementMethod.getInstance());
             body.setOnHashTagClickListener(onHashTagClickListener);
+            body.setOnLongClickListener(v -> this.itemView.performLongClick());
+            body.setOnClickListener(v -> this.itemView.performClick());
 
             root = itemView.findViewById(R.id.message_container);
-            forwardMessagesRoot = (ViewGroup) itemView.findViewById(R.id.forward_messages);
-            bubble = (BubbleLinearLayout) itemView.findViewById(R.id.item_message_bubble);
+            forwardMessagesRoot = itemView.findViewById(R.id.forward_messages);
+            bubble = itemView.findViewById(R.id.item_message_bubble);
 
             attachmentsRoot = itemView.findViewById(R.id.item_message_attachment_container);
             attachmentsHolder = new AttachmentsHolder();
-            attachmentsHolder.setVgAudios((ViewGroup) attachmentsRoot.findViewById(R.id.audio_attachments))
-                    .setVgDocs((ViewGroup) attachmentsRoot.findViewById(R.id.docs_attachments))
-                    .setVgPhotos((ViewGroup) attachmentsRoot.findViewById(R.id.photo_attachments))
-                    .setVgPosts((ViewGroup) attachmentsRoot.findViewById(R.id.posts_attachments))
-                    .setVoiceMessageRoot((ViewGroup) attachmentsRoot.findViewById(R.id.voice_message_attachments));
+            attachmentsHolder.setVgAudios(attachmentsRoot.findViewById(R.id.audio_attachments))
+                    .setVgDocs(attachmentsRoot.findViewById(R.id.docs_attachments))
+                    .setVgPhotos(attachmentsRoot.findViewById(R.id.photo_attachments))
+                    .setVgPosts(attachmentsRoot.findViewById(R.id.posts_attachments))
+                    .setVoiceMessageRoot(attachmentsRoot.findViewById(R.id.voice_message_attachments));
         }
     }
 }

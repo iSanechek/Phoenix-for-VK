@@ -26,8 +26,8 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import biz.dealnote.messenger.App;
 import biz.dealnote.messenger.media.exo.CustomHttpDataSourceFactory;
+import biz.dealnote.messenger.media.exo.ExoUtil;
 import biz.dealnote.messenger.model.ProxyConfig;
 import biz.dealnote.messenger.model.VideoSize;
 import biz.dealnote.messenger.util.Objects;
@@ -42,13 +42,15 @@ public class ExoVideoPlayer implements IVideoPlayer {
 
     private final MediaSource source;
 
+    private final OnVideoSizeChangedListener onVideoSizeChangedListener = new OnVideoSizeChangedListener(this);
+
     public ExoVideoPlayer(Context context, String url, ProxyConfig config) {
         this.player = createPlayer(context);
-        this.player.setVideoListener(new OnVideoSizeChangedListener(this));
-        this.source = createMediaSource(url, config);
+        this.player.addVideoListener(onVideoSizeChangedListener);
+        this.source = createMediaSource(context, url, config);
     }
 
-    private static MediaSource createMediaSource(String url, ProxyConfig proxyConfig) {
+    private static MediaSource createMediaSource(Context context, String url, ProxyConfig proxyConfig) {
         Proxy proxy = null;
         if (Objects.nonNull(proxyConfig)) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyConfig.getAddress(), proxyConfig.getPort()));
@@ -66,7 +68,7 @@ public class ExoVideoPlayer implements IVideoPlayer {
             }
         }
 
-        String userAgent = Util.getUserAgent(App.getInstance(), "phoenix-video-exo-player");
+        String userAgent = Util.getUserAgent(context.getApplicationContext(), "phoenix-video-exo-player");
         CustomHttpDataSourceFactory factory = new CustomHttpDataSourceFactory(userAgent, proxy);
 
         // Produces Extractor instances for parsing the media data.
@@ -80,13 +82,11 @@ public class ExoVideoPlayer implements IVideoPlayer {
     }
 
     private static SimpleExoPlayer createPlayer(Context context) {
-        final Context app = context.getApplicationContext();
-
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        return ExoPlayerFactory.newSimpleInstance(app, trackSelector);
+        return ExoPlayerFactory.newSimpleInstance(context.getApplicationContext(), trackSelector);
     }
 
     private boolean supposedToBePlaying;
@@ -106,17 +106,7 @@ public class ExoVideoPlayer implements IVideoPlayer {
             prepareCalled = true;
         }
 
-        startPlayer(player);
-    }
-
-    private static void pausePlayer(SimpleExoPlayer internalPlayer) {
-        internalPlayer.setPlayWhenReady(false);
-        internalPlayer.getPlaybackState();
-    }
-
-    private static void startPlayer(SimpleExoPlayer internalPlayer) {
-        internalPlayer.setPlayWhenReady(true);
-        internalPlayer.getPlaybackState();
+        ExoUtil.startPlayer(player);
     }
 
     @Override
@@ -126,12 +116,12 @@ public class ExoVideoPlayer implements IVideoPlayer {
         }
 
         supposedToBePlaying = false;
-        pausePlayer(player);
+        ExoUtil.pausePlayer(player);
     }
 
     @Override
     public void release() {
-        player.setVideoListener(null);
+        player.removeVideoListener(onVideoSizeChangedListener);
         player.release();
     }
 

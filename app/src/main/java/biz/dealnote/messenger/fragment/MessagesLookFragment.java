@@ -72,7 +72,7 @@ public class MessagesLookFragment extends PlaceSupportPresenterFragment<Messages
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_messages_lookup, container, false);
         ((AppCompatActivity) getActivity()).setSupportActionBar((Toolbar) root.findViewById(R.id.toolbar));
 
@@ -145,12 +145,12 @@ public class MessagesLookFragment extends PlaceSupportPresenterFragment<Messages
     }
 
     @Override
-    public void configNowVoiceMessagePlaying(int id, float progress, boolean paused) {
+    public void configNowVoiceMessagePlaying(int id, float progress, boolean paused, boolean amin) {
         // TODO: 09.10.2016
     }
 
     @Override
-    public void bindVoiceHolderById(int holderId, boolean play, boolean paused, float progress) {
+    public void bindVoiceHolderById(int holderId, boolean play, boolean paused, float progress, boolean amin) {
         // TODO: 09.10.2016
     }
 
@@ -256,11 +256,6 @@ public class MessagesLookFragment extends PlaceSupportPresenterFragment<Messages
             }
         }
     }*/
-
-    @Override
-    public void onUnsupportedAccountSelected() {
-
-    }
 
     @Override
     protected String tag() {

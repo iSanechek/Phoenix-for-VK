@@ -1,6 +1,7 @@
 package biz.dealnote.messenger.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +14,9 @@ import biz.dealnote.messenger.R;
 import biz.dealnote.messenger.activity.ActivityFeatures;
 import biz.dealnote.messenger.activity.ActivityUtils;
 import biz.dealnote.messenger.listener.OnSectionResumeCallback;
+import biz.dealnote.messenger.place.Place;
 import biz.dealnote.messenger.place.PlaceFactory;
+import biz.dealnote.messenger.settings.Settings;
 
 /**
  * Audio is not supported :-(
@@ -29,7 +32,7 @@ public class AudiosFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_music, container, false);
         ((AppCompatActivity)getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
 
@@ -44,6 +47,7 @@ public class AudiosFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.AUDIOS);
 
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
         if (actionBar != null) {

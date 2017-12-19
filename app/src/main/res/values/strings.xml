@@ -177,7 +177,7 @@
     <string name="here">Here</string>
     <string name="to_another_dialogue">To another conversation</string>
 
-    <string name="default_category_title">Default page</string>
+    <string name="default_category_title">Start page</string>
     <string name="default_category_summary">Choose page that will be loaded on app start</string>
 
     <string name="music">Music</string>
@@ -1092,7 +1092,7 @@
     <string name="other">Other</string>
     <string name="hide_notif_message_body_summary">Do not show the body of a message in a notification</string>
     <string name="hide_notif_message_body_title">Hide message body</string>
-    <string name="message_text_is_not_available"><![CDATA[<text is not available>]]></string>
+    <string name="message_text_is_not_available">New message</string>
     <string name="comments_empty_text">Be the first one to write a comment here</string>
     <string name="the_comment_is_not_in_the_list">The comment is not in the list</string>
     <string name="place_for_your_comment">• A place for your comment •</string>
@@ -1246,4 +1246,25 @@
     <string name="button_details">Details</string>
     <string name="audios_disabled_title">No access :(</string>
     <string name="audios_disabled_summary_message">On December 16, 2016, the VK administration turned off access to its music API for third-party applications</string>
+
+    <string name="api_error_900">Can\'t send messages for users from blacklist</string>
+    <string name="api_error_901">Can\'t send messages for users without dialogs</string>
+    <string name="api_error_902">Can\'t send messages to this user due to their privacy settings</string>
+    <string name="api_error_909">Can\'t edit this message, because it\'s too old</string>
+    <string name="api_error_914">Too many forwarded messages</string>
+    <string name="api_error_917">You don\'t have access to this chat</string>
+    <string name="api_error_913">Message is too long</string>
+    <string name="api_error_921">Can\'t forward these messages</string>
+    <string name="allow_fingerprint_title">Allow fingerprint</string>
+    <string name="error_login_by_fingerprint_not_allowed">Login via fingerprint is not allowed</string>
+
+    <string name="source_code_title" translatable="false">Source code</string>
+    <string name="source_code_link" translatable="false">https://github.com/PhoenixDevTeam/Phoenix-for-VK</string>
+    <string name="birthdays">Birthdays</string>
+    <string name="error_key_exchange_invalid_session_state">Invalid session state</string>
+    <string name="error_key_exchange_cancelled_by_user">Key exchange was cancelled by user</string>
+    <string name="error_key_exchange_session_expired">The key exchange session is no longer active. Please try again.</string>
+    <string name="error_activity_not_found">No compatible software installed</string>
+    <string name="last_closed_page">Last closed page</string>
+
 </resources>

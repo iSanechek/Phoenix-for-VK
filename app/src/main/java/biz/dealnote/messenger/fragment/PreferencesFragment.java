@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -56,9 +55,11 @@ import biz.dealnote.messenger.api.model.IAttachmentToken;
 import biz.dealnote.messenger.api.model.LinkAttachmentToken;
 import biz.dealnote.messenger.api.model.VKApiPhoto;
 import biz.dealnote.messenger.api.model.VKApiPhotoAlbum;
+import biz.dealnote.messenger.link.LinkHelper;
 import biz.dealnote.messenger.listener.OnSectionResumeCallback;
 import biz.dealnote.messenger.model.LocalPhoto;
 import biz.dealnote.messenger.model.SwitchableCategory;
+import biz.dealnote.messenger.place.Place;
 import biz.dealnote.messenger.place.PlaceFactory;
 import biz.dealnote.messenger.settings.AppPrefs;
 import biz.dealnote.messenger.settings.AvatarStyle;
@@ -159,8 +160,7 @@ public class PreferencesFragment extends PreferenceFragment {
             getFullApp.setTitle(R.string.get_full_app_title);
             getFullApp.setSummary(R.string.get_full_app_summary);
             getFullApp.setOnPreferenceClickListener(preference -> {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(FULL_APP_URL));
-                startActivity(browserIntent);
+                LinkHelper.openLinkInBrowser(getContext(), FULL_APP_URL);
                 return true;
             });
 
@@ -215,8 +215,7 @@ public class PreferencesFragment extends PreferenceFragment {
         Preference comment = findPreference(KEY_ADD_COMMENT);
         if (comment != null) {
             comment.setOnPreferenceClickListener(preference -> {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(AppPrefs.FULL_APP ? FULL_APP_URL : APP_URL));
-                startActivity(browserIntent);
+                LinkHelper.openLinkInBrowser(getContext(), AppPrefs.FULL_APP ? FULL_APP_URL : APP_URL);
                 return false;
             });
         }
@@ -298,8 +297,7 @@ public class PreferencesFragment extends PreferenceFragment {
 
         findPreference("privacy_policy")
                 .setOnPreferenceClickListener(preference -> {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.PRIVACY_POLICY_LINK));
-                    startActivity(browserIntent);
+                    LinkHelper.openLinkInBrowser(getContext(), Constants.PRIVACY_POLICY_LINK);
                     return true;
                 });
 
@@ -324,6 +322,12 @@ public class PreferencesFragment extends PreferenceFragment {
         findPreference("proxy")
                 .setOnPreferenceClickListener(preference -> {
                     startActivity(new Intent(getActivity(), ProxyManagerActivity.class));
+                    return true;
+                });
+
+        findPreference("source_code")
+                .setOnPreferenceClickListener(preference -> {
+                    LinkHelper.openLinkInBrowser(getContext(), getString(R.string.source_code_link));
                     return true;
                 });
     }
@@ -599,6 +603,9 @@ public class PreferencesFragment extends PreferenceFragment {
         ArrayList<String> enabledCategoriesName = new ArrayList<>();
         ArrayList<String> enabledCategoriesValues = new ArrayList<>();
 
+        enabledCategoriesName.add(getString(R.string.last_closed_page));
+        enabledCategoriesValues.add("last_closed");
+
         if (drawerSettings.isCategoryEnabled(SwitchableCategory.FRIENDS)) {
             enabledCategoriesName.add(getString(R.string.friends));
             enabledCategoriesValues.add("1");
@@ -661,6 +668,8 @@ public class PreferencesFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.PREFERENCES);
+
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
         if (actionBar != null) {
             actionBar.setTitle(R.string.settings);

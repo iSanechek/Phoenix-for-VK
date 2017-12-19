@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StatFs;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -88,32 +90,29 @@ public class FileManagerFragment extends Fragment implements FileManagerAdapter.
         showHiddenFilesAndDirs = getArguments().getBoolean(EXTRA_SHOW_CANNOT_READ, true);
         filterFileExtension = getArguments().getString(EXTRA_FILTER_EXTENSION);
 
-        filter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                File sel = new File(dir, filename);
-                boolean showReadableFile = showHiddenFilesAndDirs || sel.canRead();
-                // Filters based on whether the file is hidden or not
-                if (currentAction == SELECT_DIRECTORY) {
-                    return sel.isDirectory() && showReadableFile;
-                }
-
-                if (currentAction == SELECT_FILE) {
-                    // If it is a file check the extension if provided
-                    if (sel.isFile() && filterFileExtension != null) {
-                        return showReadableFile && sel.getName().endsWith(filterFileExtension);
-                    }
-
-                    return (showReadableFile);
-                }
-
-                return true;
+        filter = (dir, filename) -> {
+            File sel = new File(dir, filename);
+            boolean showReadableFile = showHiddenFilesAndDirs || sel.canRead();
+            // Filters based on whether the file is hidden or not
+            if (currentAction == SELECT_DIRECTORY) {
+                return sel.isDirectory() && showReadableFile;
             }
+
+            if (currentAction == SELECT_FILE) {
+                // If it is a file check the extension if provided
+                if (sel.isFile() && filterFileExtension != null) {
+                    return showReadableFile && sel.getName().endsWith(filterFileExtension);
+                }
+
+                return (showReadableFile);
+            }
+
+            return true;
         };
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_file_explorer, container, false);
         //((AppCompatActivity)getActivity()).setSupportActionBar((Toolbar) root.findViewById(R.id.toolbar));
 
@@ -164,7 +163,7 @@ public class FileManagerFragment extends Fragment implements FileManagerAdapter.
     private static final String SAVE_SCROLL_STATES = "scroll_states";
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(SAVE_DATA, fileList);
         outState.putSerializable(SAVE_PATH, path);
@@ -240,9 +239,7 @@ public class FileManagerFragment extends Fragment implements FileManagerAdapter.
         String pathString = path.getAbsolutePath();
         String[] parts = pathString.split("/");
 
-        for (int i = 0; i < parts.length; i++) {
-            pathDirsList.add(parts[i]);
-        }
+        pathDirsList.addAll(Arrays.asList(parts));
     }
 
     private void updateCurrentDirectoryTextView() {

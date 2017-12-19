@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
         mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerStateChanged(int newState) {
-                if (newState != DrawerLayout.STATE_IDLE || getNavigationFragment().isDrawerOpen()) {
+                if (newState != DrawerLayout.STATE_IDLE || mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
                     if (Objects.nonNull(mActionMode)) {
                         mActionMode.finish();
                     }
@@ -255,11 +255,10 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
             boolean intentWasHandled = handleIntent(getIntent());
 
             if (!intentWasHandled) {
-                mCurrentFrontSection = Settings.get()
-                        .ui()
-                        .getDefaultPage();
+                Place place = Settings.get().ui().getDefaultPage(mAccountId);
+                place.tryOpenWith(this);
 
-                openDrawerPage(mCurrentFrontSection);
+                //openDrawerPage(mCurrentFrontSection);
             }
 
             if (AppPrefs.FULL_APP && !BuildConfig.DEBUG) {
@@ -373,12 +372,6 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
         Logger.d(TAG, "handleIntent, extras: " + extras + ", action: " + action);
 
         if (extras != null) {
-            /*if (extras.containsKey(EXTRA_PAGE)) {
-                mCurrentFrontSection = intent.getParcelableExtra(EXTRA_PAGE);
-                openDrawerPage(mCurrentFrontSection);
-                return true;
-            }
-*/
             if (ActivityUtils.checkInputExist(this)) {
                 mCurrentFrontSection = NavigationFragment.SECTION_ITEM_DIALOGS;
                 openDrawerPage(mCurrentFrontSection);
@@ -561,7 +554,7 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
         }
 
         mCurrentFrontSection = item;
-        getNavigationFragment().selectPage(item);
+        getNavigationFragment().selectPage(item); // TODO NavigationFragment can bee NULL. WTF?
 
         if (clearBackStack) {
             clearBackStack();
@@ -628,6 +621,7 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
 
         manager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
+        // TODO: 13.12.2017 Exception java.lang.IllegalStateException:Can not perform this action after onSaveInstanceState
         Logger.d(TAG, "Back stack was cleared");
     }
 
@@ -716,8 +710,14 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
     }
 
     public void keyboardHide() {
-        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(getWindow().getDecorView().getRootView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        try {
+            InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputManager != null) {
+                inputManager.hideSoftInputFromWindow(getWindow().getDecorView().getRootView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        } catch (Exception ignored){
+
+        }
     }
 
     private Fragment getFrontFragement() {
@@ -870,7 +870,6 @@ public class MainActivity extends AppCompatActivity implements NavigationFragmen
     @Override
     public void openPlace(Place place) {
         final Bundle args = place.getArgs();
-
         switch (place.type) {
             case Place.VIDEO_PREVIEW:
                 attachFragment(VideoPreviewFragment.newInstance(place.getArgs()), true, "video_preview");

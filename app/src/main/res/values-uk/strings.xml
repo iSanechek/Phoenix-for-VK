@@ -292,8 +292,8 @@
     <string name="get_full_app_title">Отримати повний додаток</string>
     <string name="get_full_app_summary">Якщо хочете отримати більше можливостей, спробуйте Phoenix для ВК</string>
     <string name="buy_phoenix">Купити Phoenix</string>
-    <string name="default_category_summary">Виберіть сторінку , яка буде показана при запуску програми</string>
-    <string name="default_category_title">Стандартна сторінка</string>
+    <string name="default_category_summary">Виберіть сторінку, яка буде показана при запуску програми</string>
+    <string name="default_category_title">Стартова сторінка</string>
 
     <string name="drawer_feedback">Відповіді</string>
 
@@ -964,7 +964,7 @@
     <string name="other">Інше</string>
     <string name="hide_notif_message_body_summary">Не показувати текст повідомлення в сповіщенні</string>
     <string name="hide_notif_message_body_title">Приховати тіло повідомлення</string>
-    <string name="message_text_is_not_available"><![CDATA[<текст повідомлення недоступний>]]></string>
+    <string name="message_text_is_not_available">Нове повідомлення</string>
     <string name="comments_empty_text">Будьте першими, хто залишить тут коментар</string>
     <string name="the_comment_is_not_in_the_list">Коментар відсутній в списку</string>
     <string name="place_for_your_comment">• місце для Вашого коментаря •</string>
@@ -1113,4 +1113,21 @@
     <string name="group_invites_channel">Запрошення в групи</string>
     <string name="likes_channel">Мені подобається</string>
     <string name="new_posts_channel">Нові записи</string>
+
+    <string name="api_error_900">Не можна відправляти повідомлення користувачу з чорного списку</string>
+    <string name="api_error_901">Не можна першим писати користувачеві від імені спільноти</string>
+    <string name="api_error_902">Не можна відправляти повідомлення цьому користувачу в зв\'язку з налаштуваннями приватності</string>
+    <string name="api_error_914">Занадто багато пересланих повідомлень</string>
+    <string name="api_error_913">Повідомлення занадто довге</string>
+    <string name="api_error_921">Неможливо переслати вибрані повідомлення</string>
+    <string name="api_error_909">Не можна редагувати це повідомлення, тому що воно занадто застаріло</string>
+    <string name="api_error_917">У Вас немає доступу до цього чату</string>
+    <string name="allow_fingerprint_title">Дозволити відбиток пальця</string>
+    <string name="error_login_by_fingerprint_not_allowed">Вхід за допомогою відбитка пальця не дозволений</string>
+    <string name="birthdays">Дні народження</string>
+    <string name="error_key_exchange_invalid_session_state">Неприпустимий статус сесії. Обмін ключами не вдався.</string>
+    <string name="error_key_exchange_cancelled_by_user">Обмін ключами був скасований користувачем</string>
+    <string name="error_key_exchange_session_expired">Сесія вже не активна. Повторіть обмін ще раз.</string>
+    <string name="error_activity_not_found">Сумісне ПЗ не встановлено</string>
+    <string name="last_closed_page">Остання закрита</string>
 </resources>

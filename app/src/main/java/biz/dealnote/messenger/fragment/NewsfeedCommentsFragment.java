@@ -1,6 +1,7 @@
 package biz.dealnote.messenger.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,8 @@ import biz.dealnote.messenger.model.NewsfeedComment;
 import biz.dealnote.messenger.model.Post;
 import biz.dealnote.messenger.mvp.presenter.NewsfeedCommentsPresenter;
 import biz.dealnote.messenger.mvp.view.INewsfeedCommentsView;
+import biz.dealnote.messenger.place.Place;
+import biz.dealnote.messenger.settings.Settings;
 import biz.dealnote.messenger.util.Utils;
 import biz.dealnote.mvp.core.IPresenterFactory;
 
@@ -53,7 +56,7 @@ public class NewsfeedCommentsFragment extends PlaceSupportPresenterFragment<News
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_newsfeed_comments, container, false);
         ((AppCompatActivity) getActivity()).setSupportActionBar((Toolbar) root.findViewById(R.id.toolbar));
 
@@ -96,6 +99,8 @@ public class NewsfeedCommentsFragment extends PlaceSupportPresenterFragment<News
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.NEWSFEED_COMMENTS);
+
         ActivityUtils.setToolbarTitle(this, R.string.drawer_newsfeed_comments);
         ActivityUtils.setToolbarSubtitle(this, null);
 

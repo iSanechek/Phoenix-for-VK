@@ -43,7 +43,9 @@ import biz.dealnote.messenger.model.selection.LocalPhotosSelectableSource;
 import biz.dealnote.messenger.model.selection.Sources;
 import biz.dealnote.messenger.mvp.presenter.DocsListPresenter;
 import biz.dealnote.messenger.mvp.view.IDocListView;
+import biz.dealnote.messenger.place.Place;
 import biz.dealnote.messenger.place.PlaceFactory;
+import biz.dealnote.messenger.settings.Settings;
 import biz.dealnote.messenger.upload.UploadObject;
 import biz.dealnote.messenger.util.ViewUtils;
 import biz.dealnote.mvp.core.IPresenterFactory;
@@ -94,7 +96,7 @@ public class DocsFragment extends BasePresenterFragment<DocsListPresenter, IDocL
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_docs, container, false);
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
@@ -376,6 +378,8 @@ public class DocsFragment extends BasePresenterFragment<DocsListPresenter, IDocL
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.DOCS);
+
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
         if (actionBar != null) {
             actionBar.setTitle(R.string.documents);

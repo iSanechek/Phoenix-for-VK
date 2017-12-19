@@ -1,6 +1,7 @@
 package biz.dealnote.messenger.fragment.fave;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -8,7 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +22,14 @@ import biz.dealnote.messenger.R;
 import biz.dealnote.messenger.activity.ActivityFeatures;
 import biz.dealnote.messenger.activity.ActivityUtils;
 import biz.dealnote.messenger.fragment.NavigationFragment;
-import biz.dealnote.messenger.fragment.base.AccountDependencyFragment;
+import biz.dealnote.messenger.fragment.base.BaseFragment;
 import biz.dealnote.messenger.link.types.FaveLink;
 import biz.dealnote.messenger.listener.OnSectionResumeCallback;
+import biz.dealnote.messenger.place.Place;
 import biz.dealnote.messenger.settings.CurrentTheme;
+import biz.dealnote.messenger.settings.Settings;
 
-public class FaveTabsFragment extends AccountDependencyFragment {
+public class FaveTabsFragment extends BaseFragment {
 
     public static final int TAB_UNKNOWN = -1;
     public static final int TAB_PHOTOS = 0;
@@ -43,6 +45,8 @@ public class FaveTabsFragment extends AccountDependencyFragment {
         return args;
     }
 
+    private int mAccountId;
+
     public static FaveTabsFragment newInstance(int accountId, int tab){
         return newInstance(buildArgs(accountId, tab));
     }
@@ -54,19 +58,29 @@ public class FaveTabsFragment extends AccountDependencyFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.mAccountId = getArguments().getInt(Extra.ACCOUNT_ID);
+    }
+
+    public int getAccountId() {
+        return mAccountId;
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_fave_tabs, container, false);
-        ((AppCompatActivity) getActivity()).setSupportActionBar((Toolbar) root.findViewById(R.id.toolbar));
+        ((AppCompatActivity) getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
         return root;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        ViewPager viewPager = view.findViewById(R.id.viewpager);
         viewPager.setOffscreenPageLimit(1);
         setupViewPager(viewPager);
 
-        TabLayout tabLayout = (TabLayout)  view.findViewById(R.id.tablayout);
+        TabLayout tabLayout = view.findViewById(R.id.tablayout);
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         tabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
 
@@ -95,6 +109,8 @@ public class FaveTabsFragment extends AccountDependencyFragment {
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.BOOKMARKS);
+
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
 
         if(actionBar != null){

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
@@ -45,7 +46,9 @@ import biz.dealnote.messenger.model.Peer;
 import biz.dealnote.messenger.model.User;
 import biz.dealnote.messenger.mvp.presenter.DialogsPresenter;
 import biz.dealnote.messenger.mvp.view.IDialogsView;
+import biz.dealnote.messenger.place.Place;
 import biz.dealnote.messenger.place.PlaceFactory;
+import biz.dealnote.messenger.settings.Settings;
 import biz.dealnote.messenger.util.AssertUtils;
 import biz.dealnote.messenger.util.InputTextDialog;
 import biz.dealnote.messenger.util.Utils;
@@ -84,7 +87,7 @@ public class DialogsFragment extends BasePresenterFragment<DialogsPresenter, IDi
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_dialogs, container, false);
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
@@ -306,6 +309,8 @@ public class DialogsFragment extends BasePresenterFragment<DialogsPresenter, IDi
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.DIALOGS);
+
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
         if (actionBar != null) {
             actionBar.setTitle(R.string.dialogs);

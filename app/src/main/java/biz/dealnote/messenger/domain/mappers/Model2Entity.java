@@ -57,7 +57,7 @@ public class Model2Entity {
                 .setImportant(message.isImportant())
                 .setDeleted(message.isDeleted())
                 .setForwardCount(message.getForwardMessagesCount())
-                .setAttachmentsCount(message.getAttachmentsCount())
+                .setHasAttachmens(message.isHasAttachments())
                 .setStatus(message.getStatus())
                 .setOriginalId(message.getOriginalId())
                 .setChatActive(message.getChatActive())
@@ -249,7 +249,8 @@ public class Model2Entity {
                 .setCanPin(post.isCanPin())
                 .setPinned(post.isPinned())
                 .setDeleted(post.isDeleted())
-                .setViews(post.getViewCount());
+                .setViews(post.getViewCount())
+                .setDbid(post.getDbid());
 
         PostSource source = post.getSource();
         if(nonNull(source)){

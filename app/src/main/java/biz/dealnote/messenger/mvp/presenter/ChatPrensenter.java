@@ -14,7 +14,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -44,6 +43,9 @@ import biz.dealnote.messenger.longpoll.model.RealtimeAction;
 import biz.dealnote.messenger.longpoll.model.UserOffline;
 import biz.dealnote.messenger.longpoll.model.UserOnline;
 import biz.dealnote.messenger.longpoll.model.WriteText;
+import biz.dealnote.messenger.media.record.AudioRecordException;
+import biz.dealnote.messenger.media.record.AudioRecordWrapper;
+import biz.dealnote.messenger.media.record.Recorder;
 import biz.dealnote.messenger.model.AbsModel;
 import biz.dealnote.messenger.model.DraftMessage;
 import biz.dealnote.messenger.model.FwdMessages;
@@ -77,9 +79,6 @@ import biz.dealnote.messenger.util.RxUtils;
 import biz.dealnote.messenger.util.Unixtime;
 import biz.dealnote.messenger.util.Utils;
 import biz.dealnote.messenger.util.WeakConsumer;
-import biz.dealnote.messenger.util.record.AudioRecordException;
-import biz.dealnote.messenger.util.record.AudioRecordWrapper;
-import biz.dealnote.messenger.util.record.Recorder;
 import biz.dealnote.mvp.reflect.OnGuiCreated;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Predicate;
@@ -1487,10 +1486,15 @@ public class ChatPrensenter extends AbsMessageListPresenter<IChatView> {
 
         if (isLongpollNeed()) {
             LongpollUtils.register(getApplicationContext(), newMessagesOwnerId, newPeerId, oldMessageOwnerId, oldPeerId);
+            Processors.realtimeMessages()
+                    .registerNotificationsInterceptor(getPresenterId(), Pair.create(messagesOwnerId, getPeerId()));
         }
 
         resolveAccountHotSwapSupport();
         resetDatabaseLoading();
+
+        super.getData().clear();
+        safeNotifyDataChanged();
 
         loadAllCachedData();
         requestAtStart();
@@ -1507,7 +1511,7 @@ public class ChatPrensenter extends AbsMessageListPresenter<IChatView> {
         this.mDraftMessageText = null;
         this.mDraftMessageDbAttachmentsCount = 0;
 
-        boolean needToRestoreDraftMessageBody = TextUtils.isEmpty(mOutConfig.getInitialText());
+        boolean needToRestoreDraftMessageBody = isEmpty(mOutConfig.getInitialText());
         if (!needToRestoreDraftMessageBody) {
             this.mDraftMessageText = mOutConfig.getInitialText();
         }

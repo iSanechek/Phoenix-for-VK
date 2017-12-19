@@ -29,13 +29,13 @@ public abstract class AbsPresenterFragment<P extends IPresenter<V>, V extends IM
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getPresenterDelegate().onViewCreated();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         getPresenterDelegate().onSaveInstanceState(outState);
     }
@@ -114,6 +114,12 @@ public abstract class AbsPresenterFragment<P extends IPresenter<V>, V extends IM
     }
 
     private List<PresenterAction<P, V>> onReceivePresenterActions = new ArrayList<>();
+
+    protected void callPresenter(PresenterAction<P, V> action){
+        if(isPresenterPrepared()){
+            action.call(getPresenter());
+        }
+    }
 
     protected void postPrenseterReceive(PresenterAction<P, V> action){
         if(isPresenterPrepared()){

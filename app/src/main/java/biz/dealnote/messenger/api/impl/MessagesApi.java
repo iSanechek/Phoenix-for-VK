@@ -21,6 +21,7 @@ import biz.dealnote.messenger.api.model.response.LongpollHistoryResponse;
 import biz.dealnote.messenger.api.model.response.MessageHistoryResponse;
 import biz.dealnote.messenger.api.model.response.SearchDialogsResponse;
 import biz.dealnote.messenger.api.services.IMessageService;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import static biz.dealnote.messenger.util.Objects.isNull;
@@ -39,6 +40,17 @@ class MessagesApi extends AbsApi implements IMessagesApi {
 
     private Single<IMessageService> serviceRx(int... tokenTypes) {
         return super.provideService(IMessageService.class, tokenTypes);
+    }
+
+    @Override
+    public Completable edit(int peerId, int messageId, String message, List<IAttachmentToken> attachments, boolean keepFwd) {
+        String atts = join(attachments, ",", AbsApi::formatAttachmentToken);
+
+        String fwd = keepFwd ? "-" + messageId : null; // todo not working!!!
+        return serviceRx(TokenType.USER, TokenType.COMMUNITY)
+                .flatMapCompletable(service -> service
+                        .editMessage(peerId, messageId, message, atts, fwd)
+                        .toCompletable());
     }
 
     @Override
@@ -113,10 +125,10 @@ class MessagesApi extends AbsApi implements IMessagesApi {
     }
 
     @Override
-    public Single<Map<String, Integer>> delete(Collection<Integer> messageIds, Boolean spam) {
+    public Single<Map<String, Integer>> delete(Collection<Integer> messageIds, Boolean deleteForAll, Boolean spam) {
         return serviceRx(TokenType.USER, TokenType.COMMUNITY)
                 .flatMap(service -> service
-                        .delete(join(messageIds, ","), integerFromBoolean(spam)) //{"response":{"1173002":1,"1173001":1}}
+                        .delete(join(messageIds, ","), integerFromBoolean(deleteForAll), integerFromBoolean(spam)) //{"response":{"1173002":1,"1173001":1}}
                         .map(extractResponseWithErrorHandling()));
     }
 

@@ -3,8 +3,6 @@ package biz.dealnote.messenger.view;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.widget.DatePicker;
-import android.widget.TimePicker;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -38,21 +36,13 @@ public class DateTimePicker {
 
         Logger.d(TAG, "onTimerClick, init time: " + new Date(time));
 
-        new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int newYear, int newMonth, int newDay) {
-                showTime(newYear, newMonth, newDay, hours, minutes);
-            }
-        }, year, month, day).show();
+        new DatePickerDialog(context, (view, newYear, newMonth, newDay) ->
+                showTime(newYear, newMonth, newDay, hours, minutes), year, month, day).show();
     }
 
     private void showTime(final int year, final int month, final int day, final int hour, final int minutes){
-        new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int newHourOfDay, int newMinutes) {
-                callback.onDateTimeSelected(Unixtime.of(year, month, day, newHourOfDay, newMinutes));
-            }
-        }, hour, minutes, true).show();
+        new TimePickerDialog(context, (view, newHourOfDay, newMinutes) ->
+                callback.onDateTimeSelected(Unixtime.of(year, month, day, newHourOfDay, newMinutes)), hour, minutes, true).show();
     }
 
     public static class Builder {

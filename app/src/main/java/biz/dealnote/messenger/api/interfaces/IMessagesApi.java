@@ -17,6 +17,7 @@ import biz.dealnote.messenger.api.model.response.DialogsResponse;
 import biz.dealnote.messenger.api.model.response.LongpollHistoryResponse;
 import biz.dealnote.messenger.api.model.response.MessageHistoryResponse;
 import biz.dealnote.messenger.api.model.response.SearchDialogsResponse;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 /**
@@ -24,6 +25,9 @@ import io.reactivex.Single;
  * phoenix
  */
 public interface IMessagesApi {
+
+    @CheckResult
+    Completable edit(int peerId, int messageIs, String message, List<IAttachmentToken> attachments, boolean keepFwd);
 
     @CheckResult
     Single<Boolean> removeChatUser(int chatId, int userId);
@@ -50,7 +54,7 @@ public interface IMessagesApi {
     Single<Boolean> restore(int messageId);
 
     @CheckResult
-    Single<Map<String, Integer>> delete(Collection<Integer> messageIds, Boolean spam);
+    Single<Map<String, Integer>> delete(Collection<Integer> messageIds, Boolean deleteForAll, Boolean spam);
 
     @CheckResult
     Single<Boolean> markAsRead(Collection<Integer> messageIds, Integer peerId, Integer startMessageId);

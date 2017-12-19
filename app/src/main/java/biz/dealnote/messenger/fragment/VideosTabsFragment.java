@@ -1,6 +1,7 @@
 package biz.dealnote.messenger.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,19 +24,22 @@ import biz.dealnote.messenger.R;
 import biz.dealnote.messenger.activity.ActivityFeatures;
 import biz.dealnote.messenger.activity.ActivityUtils;
 import biz.dealnote.messenger.db.OwnerHelper;
-import biz.dealnote.messenger.fragment.base.AccountDependencyFragment;
+import biz.dealnote.messenger.fragment.base.BaseFragment;
 import biz.dealnote.messenger.fragment.search.SearchContentType;
 import biz.dealnote.messenger.fragment.search.criteria.VideoSearchCriteria;
 import biz.dealnote.messenger.listener.OnSectionResumeCallback;
+import biz.dealnote.messenger.place.Place;
 import biz.dealnote.messenger.place.PlaceFactory;
 import biz.dealnote.messenger.settings.CurrentTheme;
+import biz.dealnote.messenger.settings.Settings;
 
-public class VideosTabsFragment extends AccountDependencyFragment {
+public class VideosTabsFragment extends BaseFragment {
 
+    private int accountId;
     private int ownerId;
     private String action;
 
-    public static Bundle buildArgs(int accountId, int ownerId, String action){
+    public static Bundle buildArgs(int accountId, int ownerId, String action) {
         Bundle args = new Bundle();
         args.putInt(Extra.ACCOUNT_ID, accountId);
         args.putInt(Extra.OWNER_ID, ownerId);
@@ -43,11 +47,11 @@ public class VideosTabsFragment extends AccountDependencyFragment {
         return args;
     }
 
-    public static VideosTabsFragment newInstance(int accountId, int ownerId, String action){
+    public static VideosTabsFragment newInstance(int accountId, int ownerId, String action) {
         return newInstance(buildArgs(accountId, ownerId, action));
     }
 
-    public static VideosTabsFragment newInstance(Bundle args){
+    public static VideosTabsFragment newInstance(Bundle args) {
         VideosTabsFragment fragment = new VideosTabsFragment();
         fragment.setArguments(args);
         return fragment;
@@ -57,19 +61,20 @@ public class VideosTabsFragment extends AccountDependencyFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        accountId = getArguments().getInt(Extra.ACCOUNT_ID);
         ownerId = getArguments().getInt(Extra.OWNER_ID);
         action = getArguments().getString(Extra.ACTION);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_videos_tabs, container,false);
-        ((AppCompatActivity)getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_videos_tabs, container, false);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(root.findViewById(R.id.toolbar));
         return root;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         ViewPager viewPager = view.findViewById(R.id.fragment_videos_pager);
         setupViewPager(viewPager);
 
@@ -79,6 +84,10 @@ public class VideosTabsFragment extends AccountDependencyFragment {
         int tabColorSecondary = CurrentTheme.getSecondaryTextColorOnColoredBackgroundCode(getActivity());
         tabLayout.setTabTextColors(tabColorSecondary, tabColorPrimary);
         tabLayout.setupWithViewPager(viewPager);
+    }
+
+    public int getAccountId() {
+        return accountId;
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -91,24 +100,26 @@ public class VideosTabsFragment extends AccountDependencyFragment {
         viewPager.setAdapter(adapter);
     }
 
-    private boolean isMy(){
+    private boolean isMy() {
         return getAccountId() == ownerId;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Settings.get().ui().notifyPlaceResumed(Place.VIDEOS);
+
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
-        if(actionBar != null){
+        if (actionBar != null) {
             actionBar.setTitle(R.string.videos);
             actionBar.setSubtitle(isMy() ? null : OwnerHelper.loadOwnerFullName(getActivity(), getAccountId(), ownerId));
         }
 
-        if(getActivity() instanceof OnSectionResumeCallback){
-            if(isMy()){
-                ((OnSectionResumeCallback)getActivity()).onSectionResume(NavigationFragment.SECTION_ITEM_VIDEOS);
+        if (getActivity() instanceof OnSectionResumeCallback) {
+            if (isMy()) {
+                ((OnSectionResumeCallback) getActivity()).onSectionResume(NavigationFragment.SECTION_ITEM_VIDEOS);
             } else {
-                ((OnSectionResumeCallback)getActivity()).onClearSelection();
+                ((OnSectionResumeCallback) getActivity()).onClearSelection();
             }
         }
 
@@ -152,7 +163,7 @@ public class VideosTabsFragment extends AccountDependencyFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_search:
                 VideoSearchCriteria criteria = new VideoSearchCriteria("");
                 PlaceFactory.getSingleTabSearchPlace(getAccountId(), SearchContentType.VIDEOS, criteria).tryOpenWith(getActivity());

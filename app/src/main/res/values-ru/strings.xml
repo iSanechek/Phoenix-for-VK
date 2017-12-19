@@ -295,7 +295,7 @@
     <string name="get_full_app_summary">Если хотите получить больше возможностей, попробуйте Phoenix для ВК</string>
     <string name="buy_phoenix">Купить Phoenix</string>
     <string name="default_category_summary">Выберите страницу, которая будет показана при запуске приложения</string>
-    <string name="default_category_title">Стандартная страница</string>
+    <string name="default_category_title">Стартовая страница</string>
 
     <string name="drawer_feedback">Ответы</string>
 
@@ -868,8 +868,8 @@
         \n- после закрытия приложения (только для режима хранения ключей в оперативной памяти);
         \n- при удалении аккаунта из приложения.
         \n
-        \n4. ОТКАЗ ОТ ОТВЕСТВЕННОСТИ
-        \n4.1. Разработчики приложения Phoenix не несут ответсвености за потерю данных пользователя в случаем утери им ключей шифрования или неправильного использования данной опции.</string>
+        \n4. ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ
+        \n4.1. Разработчики приложения Phoenix не несут ответственности за потерю данных пользователя в случае утери им ключей шифрования или неправильного использования данной опции.</string>
     <string name="choose_location_key_store">Выбери место хранения ключей</string>
     <string name="clear_storage_of_encryption_keys">Очистить хранилище ключей шифрования</string>
     <string name="delete_keys">Удалить ключи</string>
@@ -966,7 +966,7 @@
     <string name="other">Другое</string>
     <string name="hide_notif_message_body_summary">Не показывать текст сообщения в уведомлении</string>
     <string name="hide_notif_message_body_title">Скрыть тело сообщения</string>
-    <string name="message_text_is_not_available"><![CDATA[<текст сообщения недоступен>]]></string>
+    <string name="message_text_is_not_available">Новое сообщение</string>
     <string name="comments_empty_text">Будьте первыми, кто оставит тут комментарий</string>
     <string name="the_comment_is_not_in_the_list">Комментарий отсутствует в списке</string>
     <string name="place_for_your_comment">• место для Вашего комментария •</string>
@@ -1116,4 +1116,21 @@
     <string name="group_invites_channel">Приглашения в группы</string>
     <string name="likes_channel">Мне нравится</string>
     <string name="new_posts_channel">Новые записи</string>
+
+    <string name="api_error_900">Нельзя отправлять сообщение пользователю из черного списка</string>
+    <string name="api_error_901">Нельзя первым писать пользователю от имени сообщества</string>
+    <string name="api_error_902">Нельзя отправлять сообщения этому пользователю в связи с настройками приватности</string>
+    <string name="api_error_909">Нельзя редактировать это сообщение, так как оно слишком устарело</string>
+    <string name="api_error_914">Слишком много пересланных сообщений</string>
+    <string name="api_error_913">Сообщение слишком длинное</string>
+    <string name="api_error_917">У Вас нет доступа к этому чату</string>
+    <string name="api_error_921">Невозможно переслать выбранные сообщения</string>
+    <string name="allow_fingerprint_title">Разрешить отпечаток пальца</string>
+    <string name="error_login_by_fingerprint_not_allowed">Вход с помощью отпечатка пальца не разрешен</string>
+    <string name="birthdays">Дни рождения</string>
+    <string name="error_key_exchange_invalid_session_state">Недопустимый статус сессии. Обмен ключами не удался.</string>
+    <string name="error_key_exchange_cancelled_by_user">Обмен ключами был отменен пользователем</string>
+    <string name="error_key_exchange_session_expired">Сессия уже не активна. Повторите обмен еще раз.</string>
+    <string name="error_activity_not_found">Совместимое ПО не установлено</string>
+    <string name="last_closed_page">Последняя закрытая</string>
 </resources>
